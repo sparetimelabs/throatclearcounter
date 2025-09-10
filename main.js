@@ -77,6 +77,26 @@ startBtn.addEventListener("click", () => {
   startCountdown();
 });
 
+// === Fake Ad Overlay Logic ===
+window.addEventListener("load", () => {
+  const adOverlay = document.getElementById("adOverlay");
+  const closeAd = document.getElementById("closeAd");
+
+  // Show ad with fade in
+  adOverlay.style.display = "flex";
+
+  // Close ad when clicking X
+  closeAd.addEventListener("click", () => {
+    adOverlay.style.display = "none";
+  });
+});
+
+const adImage = document.getElementById("adImage");
+
+adImage.addEventListener("click", () => {
+  adImage.classList.toggle("enlarged");
+});
+
 // === Countdown Timer ===
 function startCountdown() {
   sessionTimer = setInterval(async () => {
@@ -114,4 +134,62 @@ function startCountdown() {
 countBtn.addEventListener("click", () => {
   count++;
   countDisplay.textContent = count;
+
+  // Check for Easter Egg
+  if (easterEggs[count]) {
+    showEasterEgg(easterEggs[count]);
+  }
 });
+
+
+// === Daily Math Quotes ===
+const quotes = [
+  "Mathematics is not about numbers, equations, or algorithms: it is about understanding. – William Paul Thurston",
+  "Do not worry about your difficulties in mathematics; I assure you mine are greater. – Albert Einstein",
+  "Pure mathematics is, in its way, the poetry of logical ideas. – Albert Einstein",
+  "Mathematics is the language in which God has written the universe. – Galileo Galilei",
+  "The only way to learn mathematics is to do mathematics. – Paul Halmos",
+  "It always seems impossible until it’s done. – Nelson Mandela",
+  "Go down deep enough into anything and you will find mathematics. – Dean Schlicter",
+  "Success in math is about persistence, not genius.",
+  "If no one told you today: you're doing amazing!",
+  "Be kind to yourself today! You're trying and that's enough!",
+  "Progress is progress. Keep at it!"
+];
+
+// Pick quote of the day based on date
+function getDailyQuote() {
+  const today = new Date();
+  const dayOfYear = Math.floor(
+    (today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24
+  );
+  return quotes[dayOfYear % quotes.length];
+}
+
+// Insert into footer
+document.getElementById("dailyQuote").textContent = getDailyQuote();
+
+// === Easter Egg Logic ===
+const easterEggs = {
+  5: "Achievement unlocked: Sensitive ears 👂",
+  10: "Double digits! 🎉",
+  20: "Dedicated Listener Award 🏆",
+  42: "The answer to life, the universe, and everything 🤖",
+  69: "Nice. 😏",
+  100: "You win. 🥇"
+};
+
+function showEasterEgg(message) {
+  const popup = document.getElementById("easterEggPopup");
+  const msg = document.getElementById("easterEggMessage");
+  msg.textContent = message;
+
+  popup.style.display = "block";
+  popup.classList.add("show");
+
+  // hide after 3 seconds
+  setTimeout(() => {
+    popup.classList.remove("show");
+    setTimeout(() => popup.style.display = "none", 500);
+  }, 3000);
+}

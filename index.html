@@ -20,18 +20,36 @@
     <button id="startSessionBtn">Start Session</button>
   </div>
 
+  <!-- Ad Overlay -->
+<div id="adOverlay">
+  <div class="ad-box">
+    <span class="close-btn" id="closeAd">✖</span>
+     <img src="src/8a.png" alt="Professor Trading Card" class="ad-img" id="adImage">
+    <h2>🔥 Limited Edition Alert 🔥</h2>
+    <p>Chad Davis trading cards now available! Collect them all.</p>
+    <button>Buy Now</button>
+  </div>
+</div>
+
+<!-- Easter Egg Popup -->
+<div id="easterEggPopup" style="display:none;" class="popup">
+  <p id="easterEggMessage"></p>
+</div>
+
+
   <!-- Counter Screen -->
   <div id="counterScreen" style="display:none;">
     <h1>Throat Clear Counter</h1>
     <p id="timer">00:30</p>
-    <button id="countBtn" disabled>Clear Throat</button>
+    <button id="countBtn" type="button">Clear Throat</button>
     <p>Total Clicks: <span id="count">0</span></p>
   </div>
 
   <!-- Footer / Made by -->
     <div id="footer">
         <p>Made with ❤️ by nerds with far too much free time</p>
-        <p>*Only collects statistics for MATH 100-001</p>
+        <p>Only collects statistics for MATH 100-001.</p>
+        <p id="dailyQuote"></p>
     </div>
 
   <!-- Transparent Overlay for Non-Lecture Days (ignored in test) -->
