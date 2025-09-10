@@ -25,7 +25,7 @@ const timerDisplay = document.getElementById("timer");
 const overlay = document.getElementById("notLectureDayOverlay");
 
 // === Settings ===
-const TEST_MODE = false;  // set to true for testing
+const TEST_MODE = false;  // set to true for testing, otherwise false. 
 const TEST_DAY = 2;        // used if TEST_MODE true, 2=Tuesday
 let count = 0;
 let sessionTimer;
