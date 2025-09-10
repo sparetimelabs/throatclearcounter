@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Throat Clear Counter</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="disclaimerScreen">
+  <h1>Disclaimer</h1>
+  <p>
+    ⚠️ This app is for fun and observational purposes only.  
+    It is <strong>not meant to poke fun</strong> — we don’t always know what others are going through,  
+    and small quirks like throat clearing may mean something different to each person.  
+    By pressing <strong>Start</strong>, it starts the <strong>1 hour and 30 minute</strong> timer and you agree to participate responsibly —  
+    click the red button <strong>once per throat clear</strong>.
+  </p>
+    <button id="startSessionBtn">Start Session</button>
+  </div>
+
+  <!-- Counter Screen -->
+  <div id="counterScreen" style="display:none;">
+    <h1>Throat Clear Counter</h1>
+    <p id="timer">00:30</p>
+    <button id="countBtn" disabled>Clear Throat</button>
+    <p>Total Clicks: <span id="count">0</span></p>
+  </div>
+
+  <!-- Footer / Made by -->
+    <div id="footer">
+        <p>made by nerds with far too much free time</p>
+    </div>
+
+  <!-- Transparent Overlay for Non-Lecture Days (ignored in test) -->
+  <div id="notLectureDayOverlay">
+    <p>⚠️ Not a lecture day! Come back on Tuesday or Thursday.</p>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
