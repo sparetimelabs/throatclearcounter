@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 // === Firebase Config ===
 const firebaseConfig = {
@@ -23,13 +23,16 @@ const countBtn = document.getElementById("countBtn");
 const countDisplay = document.getElementById("count");
 const timerDisplay = document.getElementById("timer");
 const overlay = document.getElementById("notLectureDayOverlay");
+const adOverlay = document.getElementById("adOverlay");
+const closeAd = document.getElementById("closeAd");
+const adImage = document.getElementById("adImage");
 
 // === Settings ===
-const TEST_MODE = false;  // set to true for testing, otherwise false. 
-const TEST_DAY = 2;        // used if TEST_MODE true, 2=Tuesday
+const TEST_MODE = false;  // set to false for real use
+const TEST_DAY = 2;      // Tuesday
 let count = 0;
 let sessionTimer;
-let timeLeft = TEST_MODE ? 10 : 5400; // 10 sec test / 1.5h real
+let timeLeft = TEST_MODE ? 10 : 5400; // 10s test / 1.5h real
 
 // === Helpers ===
 function getLocalDateString(date = new Date()) {
@@ -39,6 +42,7 @@ function getLocalDateString(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+// === Firebase data segregation helpers ===
 function getWeekNumber(date = new Date()) {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   d.setHours(0, 0, 0, 0);
@@ -79,20 +83,15 @@ startBtn.addEventListener("click", () => {
 
 // === Fake Ad Overlay Logic ===
 window.addEventListener("load", () => {
-  const adOverlay = document.getElementById("adOverlay");
-  const closeAd = document.getElementById("closeAd");
-
-  // Show ad with fade in
-  adOverlay.style.display = "flex";
-
-  // Close ad when clicking X
-  closeAd.addEventListener("click", () => {
-    adOverlay.style.display = "none";
-  });
+  adOverlay.style.display = "flex"; // fade in
 });
 
-const adImage = document.getElementById("adImage");
+// Close ad when clicking X
+closeAd.addEventListener("click", () => {
+  adOverlay.style.display = "none";
+});
 
+// Enlarge ad image
 adImage.addEventListener("click", () => {
   adImage.classList.toggle("enlarged");
 });
@@ -105,7 +104,7 @@ function startCountdown() {
       countBtn.disabled = true;
       timerDisplay.textContent = "Session Over";
 
-      // === Send total count to Firestore once ===
+      // === Send session count to Firestore ===
       const now = new Date();
       const dateStr = getLocalDateString(now);
       const weekNum = getWeekNumber(now);
@@ -113,13 +112,18 @@ function startCountdown() {
       const weekFolder = `week_${weekNum}_${year}`;
 
       const weekDocRef = doc(db, "throat_clears", weekFolder);
-      const dailyDocRef = doc(collection(weekDocRef, "days"), dateStr);
+      const dailyCollectionRef = collection(weekDocRef, "days");
+      const dailyDocRef = doc(dailyCollectionRef, dateStr);
 
-      await setDoc(dailyDocRef, {
-        date: dateStr,
-        count: increment(count),
-        lastUpdated: serverTimestamp()
-      }, { merge: true });
+      // store this session’s count separately in "sessions" subcollection
+      const sessionDocRef = doc(collection(dailyDocRef, "sessions"));
+      await setDoc(sessionDocRef, {
+        count,
+        timestamp: serverTimestamp()
+      });
+
+      // recompute median after saving
+      await updateMedian(dailyDocRef);
 
       return;
     }
@@ -130,17 +134,26 @@ function startCountdown() {
   }, 1000);
 }
 
-// === Click Event: Increment Local Counter ===
-countBtn.addEventListener("click", () => {
-  count++;
-  countDisplay.textContent = count;
+// === Median Calculation ===
+async function updateMedian(dailyDocRef) {
+  const sessionsSnap = await getDocs(collection(dailyDocRef, "sessions"));
+  const values = [];
+  sessionsSnap.forEach(doc => values.push(doc.data().count));
 
-  // Check for Easter Egg
-  if (easterEggs[count]) {
-    showEasterEgg(easterEggs[count]);
+  if (values.length === 0) return;
+
+  values.sort((a, b) => a - b);
+  const mid = Math.floor(values.length / 2);
+  let median;
+  if (values.length % 2 === 0) {
+    median = (values[mid - 1] + values[mid]) / 2;
+  } else {
+    median = values[mid];
   }
-});
 
+  // save median into daily doc
+  await setDoc(dailyDocRef, { median }, { merge: true });
+}
 
 // === Daily Math Quotes ===
 const quotes = [
@@ -157,7 +170,6 @@ const quotes = [
   "Progress is progress. Keep at it!"
 ];
 
-// Pick quote of the day based on date
 function getDailyQuote() {
   const today = new Date();
   const dayOfYear = Math.floor(
@@ -166,7 +178,6 @@ function getDailyQuote() {
   return quotes[dayOfYear % quotes.length];
 }
 
-// Insert into footer
 document.getElementById("dailyQuote").textContent = getDailyQuote();
 
 // === Easter Egg Logic ===
@@ -193,3 +204,14 @@ function showEasterEgg(message) {
     setTimeout(() => popup.style.display = "none", 500);
   }, 3000);
 }
+
+// === Click Event: Increment Local Counter ===
+countBtn.addEventListener("click", () => {
+  count++;
+  countDisplay.textContent = count;
+
+  // Check for Easter Egg
+  if (easterEggs[count]) {
+    showEasterEgg(easterEggs[count]);
+  }
+});
