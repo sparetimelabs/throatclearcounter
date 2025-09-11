@@ -51,10 +51,18 @@ function getWeekNumber(date = new Date()) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
+// === Helpers ===
 function isLectureDay(date = new Date()) {
   const day = date.getDay();
+  const hour = date.getHours();
+
   if (TEST_MODE) return TEST_DAY === 2 || TEST_DAY === 4;
-  return day === 2 || day === 4;
+
+  // Allow only Tuesday (2) and Thursday (4) after 2pm
+  if ((day === 2 || day === 4) && hour >= 14) {
+    return true;
+  }
+  return false;
 }
 
 // === Overlay check ===
@@ -256,3 +264,58 @@ function updateCountdown() {
 // Update every second
 setInterval(updateCountdown, 1000);
 updateCountdown();
+
+
+/*
+// Overlay Countdown function fading out
+function updateCountdown() {
+  const countdownEl = document.getElementById('countdown');
+  const lectureDays = [2, 4]; // Tuesday = 2, Thursday = 4
+  const now = new Date();
+  const today = now.getDay();
+
+  // Find next lecture day
+  let nextLecture = new Date(now);
+  let daysToAdd = 0;
+  for (let i = 0; i <= 7; i++) { // include today in case it's before 2pm
+    const checkDay = (today + i) % 7;
+    if (lectureDays.includes(checkDay)) {
+      // If today is lecture day but it's already 2pm, skip to next
+      if (i === 0 && now.getHours() >= 14) continue;
+      daysToAdd = i;
+      break;
+    }
+  }
+
+  nextLecture.setDate(now.getDate() + daysToAdd);
+  nextLecture.setHours(14, 0, 0, 0); // 2:00 PM
+
+  const diff = nextLecture - now;
+
+  if (diff <= 0) {
+    countdownEl.textContent = "00:00:00";
+
+    // === Fade out overlay when time hits 2pm ===
+    overlay.style.transition = "opacity 1s ease";
+    overlay.style.opacity = 0;
+
+    setTimeout(() => {
+      overlay.style.display = "none";
+      disclaimerScreen.style.display = "block"; // go to disclaimer
+    }, 1000);
+
+    return;
+  }
+
+  const hours = Math.floor(diff / 1000 / 60 / 60);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  countdownEl.textContent =
+    `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+}
+
+// Update every second
+setInterval(updateCountdown, 1000);
+updateCountdown();
+*/
