@@ -215,3 +215,44 @@ countBtn.addEventListener("click", () => {
     showEasterEgg(easterEggs[count]);
   }
 });
+
+// Overlay Countdown function
+function updateCountdown() {
+  const countdownEl = document.getElementById('countdown');
+  const lectureDays = [2, 4]; // Tuesday = 2, Thursday = 4
+  const now = new Date();
+  const today = now.getDay();
+
+  // Find next lecture day
+  let nextLecture = new Date(now);
+  let daysToAdd = 0;
+  for (let i = 0; i <= 7; i++) { // include today in case it's before 2pm
+    const checkDay = (today + i) % 7;
+    if (lectureDays.includes(checkDay)) {
+      // Check if today is a lecture day but time already passed
+      if (i === 0 && now.getHours() >= 14) continue;
+      daysToAdd = i;
+      break;
+    }
+  }
+
+  nextLecture.setDate(now.getDate() + daysToAdd);
+  nextLecture.setHours(14, 0, 0, 0); // set to 2:00 PM
+
+  const diff = nextLecture - now;
+
+  if (diff <= 0) {
+    countdownEl.textContent = "00:00:00";
+    return;
+  }
+
+  const hours = Math.floor(diff / 1000 / 60 / 60);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  countdownEl.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+}
+
+// Update every second
+setInterval(updateCountdown, 1000);
+updateCountdown();
