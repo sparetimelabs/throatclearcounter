@@ -252,6 +252,17 @@ function updateCountdown() {
   if (diff <= 0) {
     countdownEl.textContent = "00:00:00";
     return;
+
+    /*
+    // === Fade out overlay when time hits 2pm ===
+    overlay.style.transition = "opacity 1s ease";
+    overlay.style.opacity = 0;
+
+    setTimeout(() => {
+      overlay.style.display = "none";
+      disclaimerScreen.style.display = "block"; // go to disclaimer
+    }, 1000);
+    */
   }
 
   const hours = Math.floor(diff / 1000 / 60 / 60);
