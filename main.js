@@ -32,7 +32,7 @@ const TEST_MODE = true;  // set to false for real use, simply a tester to test f
 const TEST_DAY = 2;      // Tuesday test condition 
 let count = 0;
 let sessionTimer;
-let timeLeft = TEST_MODE ? 10 : 5400; // 10s test / 1.5h real
+let timeLeft = TEST_MODE ? 5400 : 5400; // 10s test / 1.5h real
 
 // === Helpers ===
 function getLocalDateString(date = new Date()) {
