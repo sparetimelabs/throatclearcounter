@@ -3,39 +3,39 @@
 <head>
   <title>Throat Clear Counter</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="/src/favicon.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="disclaimerScreen">
-  <h1>Disclaimer</h1>
-  <p>
-    ⚠️ This app is for fun and observational purposes only.  
-    It is <strong>not meant to poke fun</strong> — we don’t always know what others are going through,  
-    and small quirks like throat clearing may mean something different to each person.  
-    By pressing <strong>Start</strong>, it starts the <strong>1 hour and 30 minute</strong> timer and you agree to participate responsibly —  
-    click the red button <strong>once per throat clear</strong>.
-  </p>
-    <button id="startSessionBtn">Start Session</button>
+  <div id="disclaimerScreen">
+    <h1>Disclaimer</h1>
+    <p>
+      ⚠️ This app is for fun and observational purposes only.  
+      It is <strong>not meant to poke fun</strong> — we don’t always know what others are going through,  
+      and small quirks like throat clearing may mean something different to each person.  
+      By pressing <strong>Start</strong>, it starts the <strong>1 hour and 30 minute</strong> timer and you agree to participate responsibly —  
+      click the red button <strong>once per throat clear</strong>.
+    </p>
+      <button id="startSessionBtn">Start Session</button>
   </div>
 
   <!-- Ad Overlay -->
-<div id="adOverlay">
-  <div class="ad-box">
-    <span class="close-btn" id="closeAd">✖</span>
+  <div id="adOverlay">
+    <div class="ad-box">
+      <span class="close-btn" id="closeAd">✖</span>
 
-    <div class="ad-image-container">
-      <img src="src/8a.png" alt="Professor Trading Card" class="ad-img" id="adImage">
-      <img src="src/discountheader.png" alt="Discount" class="discount-img">
+      <div class="ad-image-container">
+        <img src="src/8a.png" alt="Professor Trading Card" class="ad-img" id="adImage">
+        <img src="src/discountheader.png" alt="Discount" class="discount-img">
+      </div>
+
+      <h2>🔥 Limited Edition Alert 🔥</h2>
+      <p>Chad Davis trading cards now available! Collect them all.</p>
+      <button>Buy Now</button>
     </div>
-
-    <h2>🔥 Limited Edition Alert 🔥</h2>
-    <p>Chad Davis trading cards now available! Collect them all.</p>
-    <button>Buy Now</button>
   </div>
-</div>
-
 
   <!-- Easter Egg Popup -->
   <div id="easterEggPopup" style="display:none;" class="popup">
@@ -51,12 +51,11 @@
   </div>
 
   <!-- Footer / Made by -->
-    <div id="footer">
-        <p>Made with ❤️ by nerds with far too much free time</p>
-        <p>Only collects statistics for MATH 100-001.</p>
-        <p id="dailyQuote"></p>
-    </div>
-
+  <div id="footer">
+    <p>Made with ❤️ by nerds with far too much free time</p>
+    <p>Only collects statistics for MATH 100-001.</p>
+    <p id="dailyQuote"></p>
+  </div>
   <!-- Transparent Overlay for Non-Lecture Days (ignored in test) -->
   <div id="notLectureDayOverlay">
     <p>⚠️ Not a lecture day! Come back on Tuesday or Thursday.</p>
