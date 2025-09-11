@@ -138,8 +138,8 @@ button {
 }
 
 .ad-box p {
-  font-size: 1rem;
-  margin-bottom: 15px;
+  font-size: 1.3rem;
+  margin-bottom: 5px;
 }
 
 .ad-box button {
@@ -167,9 +167,34 @@ button {
 
 /* Image inside ad */
 .ad-img {
-  max-width: 200px;
+  max-width: 300px;
   cursor: pointer;
   transition: transform 0.3s ease;
+}
+
+.ad-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.discount-img {
+  position: absolute;
+  top: -75px;       /* slightly above the box if you like */
+  left: -130px;      /* slightly to the left */
+  width: 200px;      /* bigger size */
+  height: 200px;     /* bigger size */
+  /*transform: rotate(-10deg); /* optional tilt for sticker effect */
+  pointer-events: none;      /* don't block clicks */
+  z-index: 10;               /* make sure it's above the ad image */
+}
+/* Optional: Fade in the ad */
+#adOverlay {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+#adOverlay.show {
+  opacity: 1;
 }
 
 /* Enlarged state */

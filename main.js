@@ -29,7 +29,7 @@ const adImage = document.getElementById("adImage");
 
 // === Settings ===
 const TEST_MODE = false;  // set to false for real use, simply a tester to test functionality without locking out
-const TEST_DAY = 2;      // Tuesday
+const TEST_DAY = 2;      // Tuesday test condition 
 let count = 0;
 let sessionTimer;
 let timeLeft = TEST_MODE ? 10 : 5400; // 10s test / 1.5h real
