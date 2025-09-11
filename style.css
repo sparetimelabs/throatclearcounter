@@ -152,6 +152,35 @@ button {
   margin-bottom: 5px;
 }
 
+.prof-name {
+  position: relative;
+  color: #ff0000; /* base text color */
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+/* Highlight animation using pseudo-element */
+.prof-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 0%;
+  background: yellow; /* highlight color */
+  z-index: -1; /* behind the text */
+  transition: width 0.5s ease;
+}
+
+.prof-name:hover::after {
+  width: 100%; /* animate highlight from left to right */
+}
+
+.prof-name:hover {
+  color: black; /* optional text color change when highlighted */
+}
+
 .ad-box button {
   background: #ff0000;
   color: white;
