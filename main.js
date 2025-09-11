@@ -28,7 +28,7 @@ const closeAd = document.getElementById("closeAd");
 const adImage = document.getElementById("adImage");
 
 // === Settings ===
-const TEST_MODE = false;  // set to false for real use, simply a tester to test functionality without locking out
+const TEST_MODE = true;  // set to false for real use, simply a tester to test functionality without locking out
 const TEST_DAY = 2;      // Tuesday test condition 
 let count = 0;
 let sessionTimer;
