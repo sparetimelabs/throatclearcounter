@@ -13,6 +13,7 @@ body {
 }
 
 #disclaimerScreen, #counterScreen {
+  display: none;
   max-width: 500px;
   margin: auto;
   padding: 20px;
@@ -52,7 +53,7 @@ button {
 }
 
 #notLectureDayOverlay {
-  display: flex;
+  display: none;
   flex-direction: column;   /* stack vertically */
   align-items: center;
   justify-content: center;
@@ -64,7 +65,14 @@ button {
   z-index: 999;
   color: white;
   text-align: center;
+  opacity:  1;
+  transition: opacity 1s ease;
 }
+
+#notLectureDayOverlay.fade-out {
+  opacity: 0;
+}
+
 
 #notLectureMessage {
   font-size: 2rem;

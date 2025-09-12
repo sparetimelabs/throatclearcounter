@@ -1,5 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+// === Firebase Import ===
+import { 
+  initializeApp 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import { 
+  getFirestore, collection, doc, setDoc, getDocs, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 // === Firebase Config ===
 const firebaseConfig = {
@@ -28,11 +34,13 @@ const closeAd = document.getElementById("closeAd");
 const adImage = document.getElementById("adImage");
 
 // === Settings ===
-const TEST_MODE = true;  // set to false for real use, simply a tester to test functionality without locking out
-const TEST_DAY = 2;      // Tuesday test condition 
+// Toggle this ON for short testing flows
+const TEST_MODE = true;   // <<< SET to true for testing
+const TEST_START_DELAY = 5; // seconds until "lecture starts" in TEST_MODE
+const SESSION_DURATION = TEST_MODE ? 10 : 4800; // 10s test / 1h20 real
 let count = 0;
 let sessionTimer;
-let timeLeft = TEST_MODE ? 5400 : 5400; // 10s test / 1.5h real
+let timeLeft = SESSION_DURATION;
 
 // === Helpers ===
 function getLocalDateString(date = new Date()) {
@@ -42,7 +50,6 @@ function getLocalDateString(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
-// === Firebase data segregation helpers ===
 function getWeekNumber(date = new Date()) {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   d.setHours(0, 0, 0, 0);
@@ -51,38 +58,70 @@ function getWeekNumber(date = new Date()) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
-// === Helpers ===
 function isLectureDay(date = new Date()) {
+  if (TEST_MODE) return true; // always lecture day in testing
   const day = date.getDay();
-  const hour = date.getHours();
-
-  if (TEST_MODE) return TEST_DAY === 2 || TEST_DAY === 4;
-
-  // Allow only Tuesday (2) and Thursday (4) after 2pm
-  if ((day === 2 || day === 4) && hour >= 14) {
-    return true;
-  }
-  return false;
+  return day === 2 || day === 4; // Tue or Thu
 }
 
-// === Overlay check ===
-if (!isLectureDay()) {
-  overlay.style.display = "flex";
-  counterScreen.style.display = "none";
-  disclaimerScreen.style.display = "none";
-} else {
-  overlay.style.display = "none";
-  counterScreen.style.display = "none"; // only show after disclaimer
+// === Overlay Countdown (handles real + test) ===
+function updateCountdown() {
+  const countdownEl = document.getElementById("countdown");
+  const now = new Date();
+  let diff;
+
+  if (TEST_MODE) {
+    diff = TEST_START_DELAY * 1000 - (now - window._testStartTime);
+  } else {
+    const lectureDays = [2, 4]; // Tue, Thu
+    const today = now.getDay();
+    let nextLecture = new Date(now);
+    let daysToAdd = 0;
+
+    for (let i = 0; i <= 7; i++) {
+      const checkDay = (today + i) % 7;
+      if (lectureDays.includes(checkDay)) {
+        if (i === 0 && now.getHours() >= 14) continue; // skip if past 2pm today
+        daysToAdd = i;
+        break;
+      }
+    }
+
+    nextLecture.setDate(now.getDate() + daysToAdd);
+    nextLecture.setHours(14, 0, 0, 0); // 2:00 PM
+    diff = nextLecture - now;
+  }
+
+  if (diff <= 0) {
+    // Fade out overlay
+    overlay.style.transition = "opacity 1s ease";
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.style.display = "none";
+      disclaimerScreen.style.display = "block";
+    }, 1000);
+    return;
+  }
+
+  const hours = Math.floor(diff / 1000 / 60 / 60);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  countdownEl.textContent = 
+    `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:${seconds.toString().padStart(2,"0")}`;
 }
 
 // === Start Session ===
 startBtn.addEventListener("click", () => {
-  if (!isLectureDay()) {
+  if (!isLectureDay() && !TEST_MODE) {
     alert("This app only works on Tuesdays and Thursdays.");
     return;
   }
 
+  // Hide everything else
+  overlay.style.display = "none";
   disclaimerScreen.style.display = "none";
+
+  // Show counter and enable counting
   counterScreen.style.display = "block";
   countBtn.disabled = false;
 
@@ -91,20 +130,23 @@ startBtn.addEventListener("click", () => {
 
 // === Fake Ad Overlay Logic ===
 window.addEventListener("load", () => {
-  adOverlay.style.display = "flex"; // fade in
+  adOverlay.style.display = "flex"; 
+  if (TEST_MODE) {
+    window._testStartTime = new Date();
+    overlay.style.display = "flex";
+  } else if (!isLectureDay()) {
+    overlay.style.display = "flex";
+    counterScreen.style.display = "none";
+    disclaimerScreen.style.display = "none";
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
 });
 
-// Close ad when clicking X
-closeAd.addEventListener("click", () => {
-  adOverlay.style.display = "none";
-});
+closeAd.addEventListener("click", () => adOverlay.style.display = "none");
+adImage.addEventListener("click", () => adImage.classList.toggle("enlarged"));
 
-// Enlarge ad image
-adImage.addEventListener("click", () => {
-  adImage.classList.toggle("enlarged");
-});
-
-// === Countdown Timer ===
+// === Countdown Timer (session) ===
 function startCountdown() {
   sessionTimer = setInterval(async () => {
     if (timeLeft <= 0) {
@@ -112,7 +154,7 @@ function startCountdown() {
       countBtn.disabled = true;
       timerDisplay.textContent = "Session Over";
 
-      // === Send session count to Firestore ===
+      // Save to Firestore
       const now = new Date();
       const dateStr = getLocalDateString(now);
       const weekNum = getWeekNumber(now);
@@ -123,16 +165,10 @@ function startCountdown() {
       const dailyCollectionRef = collection(weekDocRef, "days");
       const dailyDocRef = doc(dailyCollectionRef, dateStr);
 
-      // store this session’s count separately in "sessions" subcollection
       const sessionDocRef = doc(collection(dailyDocRef, "sessions"));
-      await setDoc(sessionDocRef, {
-        count,
-        timestamp: serverTimestamp()
-      });
+      await setDoc(sessionDocRef, { count, timestamp: serverTimestamp() });
 
-      // recompute median after saving
       await updateMedian(dailyDocRef);
-
       return;
     }
     timeLeft--;
@@ -152,20 +188,16 @@ async function updateMedian(dailyDocRef) {
 
   values.sort((a, b) => a - b);
   const mid = Math.floor(values.length / 2);
-  let median;
-  if (values.length % 2 === 0) {
-    median = (values[mid - 1] + values[mid]) / 2;
-  } else {
-    median = values[mid];
-  }
+  const median = values.length % 2 === 0
+    ? (values[mid - 1] + values[mid]) / 2
+    : values[mid];
 
-  // save median into daily doc
   await setDoc(dailyDocRef, { median }, { merge: true });
 }
 
 // === Daily Math Quotes ===
 const quotes = [
-  "Mathematics is not about numbers, equations, or algorithms: it is about understanding. – William Paul Thurston",
+  "Mathematics is not about numbers, equations, or algorithms: it is about understanding. – William Thurston",
   "Do not worry about your difficulties in mathematics; I assure you mine are greater. – Albert Einstein",
   "Pure mathematics is, in its way, the poetry of logical ideas. – Albert Einstein",
   "Mathematics is the language in which God has written the universe. – Galileo Galilei",
@@ -185,10 +217,9 @@ function getDailyQuote() {
   );
   return quotes[dayOfYear % quotes.length];
 }
-
 document.getElementById("dailyQuote").textContent = getDailyQuote();
 
-// === Easter Egg Logic ===
+// === Easter Eggs ===
 const easterEggs = {
   5: "Achievement unlocked: Sensitive ears 👂",
   10: "Double digits! 🎉",
@@ -206,127 +237,23 @@ function showEasterEgg(message) {
   popup.style.display = "block";
   popup.classList.add("show");
 
-  // hide after 3 seconds
   setTimeout(() => {
     popup.classList.remove("show");
     setTimeout(() => popup.style.display = "none", 500);
   }, 3000);
 }
 
-// === Click Event: Increment Local Counter ===
-countBtn.addEventListener("click", () => {
+// === Counting (button + spacebar) ===
+function incrementCount() {
   count++;
   countDisplay.textContent = count;
+  if (easterEggs[count]) showEasterEgg(easterEggs[count]);
+}
 
-  // Check for Easter Egg
-  if (easterEggs[count]) {
-    showEasterEgg(easterEggs[count]);
+countBtn.addEventListener("click", incrementCount);
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !countBtn.disabled) {
+    e.preventDefault();
+    incrementCount();
   }
 });
-
-// Overlay Countdown function
-function updateCountdown() {
-  const countdownEl = document.getElementById('countdown');
-  const lectureDays = [2, 4]; // Tuesday = 2, Thursday = 4
-  const now = new Date();
-  const today = now.getDay();
-
-  // Find next lecture day
-  let nextLecture = new Date(now);
-  let daysToAdd = 0;
-  for (let i = 0; i <= 7; i++) { // include today in case it's before 2pm
-    const checkDay = (today + i) % 7;
-    if (lectureDays.includes(checkDay)) {
-      // Check if today is a lecture day but time already passed
-      if (i === 0 && now.getHours() >= 14) continue;
-      daysToAdd = i;
-      break;
-    }
-  }
-
-  nextLecture.setDate(now.getDate() + daysToAdd);
-  nextLecture.setHours(14, 0, 0, 0); // set to 2:00 PM
-
-  const diff = nextLecture - now;
-
-  if (diff <= 0) {
-    countdownEl.textContent = "00:00:00";
-    return;
-
-    /*
-    // === Fade out overlay when time hits 2pm ===
-    overlay.style.transition = "opacity 1s ease";
-    overlay.style.opacity = 0;
-
-    setTimeout(() => {
-      overlay.style.display = "none";
-      disclaimerScreen.style.display = "block"; // go to disclaimer
-    }, 1000);
-    */
-  }
-
-  const hours = Math.floor(diff / 1000 / 60 / 60);
-  const minutes = Math.floor((diff / 1000 / 60) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-
-  countdownEl.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-}
-
-// Update every second
-setInterval(updateCountdown, 1000);
-updateCountdown();
-
-
-/*
-// Overlay Countdown function fading out
-function updateCountdown() {
-  const countdownEl = document.getElementById('countdown');
-  const lectureDays = [2, 4]; // Tuesday = 2, Thursday = 4
-  const now = new Date();
-  const today = now.getDay();
-
-  // Find next lecture day
-  let nextLecture = new Date(now);
-  let daysToAdd = 0;
-  for (let i = 0; i <= 7; i++) { // include today in case it's before 2pm
-    const checkDay = (today + i) % 7;
-    if (lectureDays.includes(checkDay)) {
-      // If today is lecture day but it's already 2pm, skip to next
-      if (i === 0 && now.getHours() >= 14) continue;
-      daysToAdd = i;
-      break;
-    }
-  }
-
-  nextLecture.setDate(now.getDate() + daysToAdd);
-  nextLecture.setHours(14, 0, 0, 0); // 2:00 PM
-
-  const diff = nextLecture - now;
-
-  if (diff <= 0) {
-    countdownEl.textContent = "00:00:00";
-
-    // === Fade out overlay when time hits 2pm ===
-    overlay.style.transition = "opacity 1s ease";
-    overlay.style.opacity = 0;
-
-    setTimeout(() => {
-      overlay.style.display = "none";
-      disclaimerScreen.style.display = "block"; // go to disclaimer
-    }, 1000);
-
-    return;
-  }
-
-  const hours = Math.floor(diff / 1000 / 60 / 60);
-  const minutes = Math.floor((diff / 1000 / 60) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-
-  countdownEl.textContent =
-    `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-}
-
-// Update every second
-setInterval(updateCountdown, 1000);
-updateCountdown();
-*/
