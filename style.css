@@ -13,7 +13,6 @@ body {
 }
 
 #disclaimerScreen, #counterScreen {
-  display: none;
   max-width: 500px;
   margin: auto;
   padding: 20px;
@@ -53,7 +52,7 @@ button {
 }
 
 #notLectureDayOverlay {
-  display: none;
+  display: flex;
   flex-direction: column;   /* stack vertically */
   align-items: center;
   justify-content: center;
