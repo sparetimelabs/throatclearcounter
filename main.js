@@ -35,7 +35,7 @@ const adImage = document.getElementById("adImage");
 
 // === Settings ===
 // Toggle this ON for short testing flows
-const TEST_MODE = true;   // <<< SET to true for testing
+const TEST_MODE = false;   // <<< SET to true for testing
 const TEST_START_DELAY = 5; // seconds until "lecture starts" in TEST_MODE
 const SESSION_DURATION = TEST_MODE ? 10 : 4800; // 10s test / 1h20 real
 let count = 0;
