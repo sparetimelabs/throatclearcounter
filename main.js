@@ -7,7 +7,14 @@ import {
   getFirestore, collection, doc, setDoc, getDocs, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+import { 
+  getAuth, signInAnonymously 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
 // === Firebase Config ===
+/*
+API keys are meant to be shown, server side auth and security has been implemented. 
+*/
 const firebaseConfig = {
   apiKey: "AIzaSyD3bBrwXPncpMjpxVSYNeDiRhtwMD8Gr1I",
   authDomain: "throat-clear-counter.firebaseapp.com",
@@ -22,6 +29,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // === DOM Elements ===
+const auth = getAuth();
 const disclaimerScreen = document.getElementById("disclaimerScreen");
 const counterScreen = document.getElementById("counterScreen");
 const startBtn = document.getElementById("startSessionBtn");
@@ -35,12 +43,16 @@ const adImage = document.getElementById("adImage");
 
 // === Settings ===
 // Toggle this ON for short testing flows
-const TEST_MODE = false;   // <<< SET to true for testing
+const TEST_MODE = true;   // <<< SET to true for testing
 const TEST_START_DELAY = 5; // seconds until "lecture starts" in TEST_MODE
 const SESSION_DURATION = TEST_MODE ? 10 : 4800; // 10s test / 1h20 real
 let count = 0;
 let sessionTimer;
 let timeLeft = SESSION_DURATION;
+
+signInAnonymously(auth)
+.then(() => console.log("Signed in anon"))
+.catch(err => console.error(err));
 
 // === Helpers ===
 function getLocalDateString(date = new Date()) {
@@ -111,6 +123,7 @@ function updateCountdown() {
   const seconds = totalSeconds % 60;
 
   // Decide format
+  // Shows up as 4 days 4 hours? Calculation is wrong
   if (days > 0) {
     // Show in "X days, Y hours"
     countdownEl.textContent = `${days} day${days > 1 ? "s" : ""}, ${hours} hour${hours !== 1 ? "s" : ""}`;
@@ -186,6 +199,29 @@ function startCountdown() {
 }
 
 // === Median Calculation ===
+/*
+Suppose that the sessions subcollection has counts in a 1 dimensional array: 
+
+[5, 8, 3, 7]
+
+The function sorts this array using the values.sort() function.
+A compare function is also added:
+
+(a, b) => a - b.
+
+If the result is negative, a comes before b. 
+If its zero, they are equal (i.e. order unchaged). 
+If its positive, b comes before a: 
+
+[3, 5, 7, 8]
+
+Since this array has an even number of integer elements, the median is found by getting the sum of "middle two" 
+and dividing by two: 
+
+(5+7)/ 2 = 12/2 = 6
+*/
+
+
 async function updateMedian(dailyDocRef) {
   const sessionsSnap = await getDocs(collection(dailyDocRef, "sessions"));
   const values = [];
