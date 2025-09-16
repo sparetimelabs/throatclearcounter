@@ -43,9 +43,9 @@ const adImage = document.getElementById("adImage");
 
 // === Settings ===
 // Toggle this ON for short testing flows
-const TEST_MODE = false;   // <<< SET to true for testing
+const TEST_MODE = true;   // <<< SET to true for testing
 const TEST_START_DELAY = 5; // seconds until "lecture starts" in TEST_MODE
-const SESSION_DURATION = TEST_MODE ? 10 : 4800; // 10s test / 1h20 real
+const SESSION_DURATION = TEST_MODE ? 4800 : 4800; // 10s test / 1h20 real
 let count = 0;
 let sessionTimer;
 let timeLeft = SESSION_DURATION;
@@ -220,8 +220,6 @@ and dividing by two:
 
 (5+7)/ 2 = 12/2 = 6
 */
-
-
 async function updateMedian(dailyDocRef) {
   const sessionsSnap = await getDocs(collection(dailyDocRef, "sessions"));
   const values = [];
