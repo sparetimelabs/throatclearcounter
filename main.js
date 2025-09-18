@@ -266,6 +266,7 @@ const easterEggs = {
   10: "Double digits! 🎉",
   20: "Dedicated Listener Award 🏆",
   42: "The answer to life, the universe, and everything 🤖",
+  67: "Ts so tuff",
   69: "Nice. 😏",
   100: "You win. 🥇"
 };
